@@ -1,5 +1,5 @@
 ## how to use
 ```
-yarn
+npm i
 npm run dev
 ```
