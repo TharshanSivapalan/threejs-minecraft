@@ -118,21 +118,21 @@ function animate() {
     requestAnimationFrame(animate);
 
     var delta = clock.getDelta();
-    var speed = 10;
+    var speed = 100;
     // up
-    if (keys[38]) {
+    if (keys[38] || keys[90]) {
         controls.getObject().translateZ(-delta * speed);
     }
     // down
-    if (keys[40]) {
+    if (keys[40] || keys[83]) {
         controls.getObject().translateZ(delta * speed);
     }
     // left
-    if (keys[37]) {
+    if (keys[37] || keys[81]) {
         controls.getObject().translateX(-delta * speed);
     }
     // right
-    if (keys[39]) {
+    if (keys[39] || keys[68]) {
         controls.getObject().translateX(delta * speed);
     }
 
