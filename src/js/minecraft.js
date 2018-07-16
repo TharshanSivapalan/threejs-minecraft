@@ -33,15 +33,36 @@ function init() {
     // camera
     camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
 
+    // GRASS MATERIAL
+    var grassMaterials = [
+        new THREE.MeshLambertMaterial({
+            map: THREE.ImageUtils.loadTexture('images/grass-dirt.png')
+        }),
+        new THREE.MeshLambertMaterial({
+            map: THREE.ImageUtils.loadTexture('images/grass-dirt.png')
+        }),
+        new THREE.MeshLambertMaterial({
+            map: THREE.ImageUtils.loadTexture('images/grass.png')
+        }),
+        new THREE.MeshLambertMaterial({
+            map: THREE.ImageUtils.loadTexture('images/dirt.png')
+        }),
+        new THREE.MeshLambertMaterial({
+            map: THREE.ImageUtils.loadTexture('images/grass-dirt.png')
+        }),
+        new THREE.MeshLambertMaterial({
+            map: THREE.ImageUtils.loadTexture('images/grass-dirt.png')
+        })
+    ];
+
     // cubes floor
     for (var x = 0; x < 30; x++) {
         for (var y = 0; y < 30; y++) {
             var geometry = new THREE.BoxGeometry(2, 2, 2);
+
             var texture = new THREE.TextureLoader().load( 'images/mine.jpg' ); // Relatif au dossier build du projet
-            var material = new THREE.MeshBasicMaterial( { map: texture } );
-            /*var material = new THREE.MeshBasicMaterial({
-                color: Math.floor(Math.random() * 16777215)
-            });*/
+            var material = new THREE.MeshFaceMaterial(grassMaterials);
+
             var mesh = new THREE.Mesh(geometry, material);
             mesh.position.x -= x * 2;
             mesh.position.z -= y * 2;
@@ -118,7 +139,7 @@ function animate() {
     requestAnimationFrame(animate);
 
     var delta = clock.getDelta();
-    var speed = 100;
+    var speed = 50;
     // up
     if (keys[38] || keys[90]) {
         controls.getObject().translateZ(-delta * speed);
