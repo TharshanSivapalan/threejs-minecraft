@@ -62,8 +62,6 @@ function init() {
         for (var y = 0; y < 30; y++) {
             var geometry = new THREE.BoxGeometry(2, 2, 2);
 
-/*            var texture = new THREE.TextureLoader().load( 'images/crate.gif' ); // Relatif au dossier build du projet
-            var material = new THREE.MeshBasicMaterial( { map: texture } );*/
 
             var mesh = new THREE.Mesh(geometry, material);
             mesh.position.x -= x * 2;
@@ -138,7 +136,7 @@ function init() {
     var cubeMap = new THREE.CubeTexture( [] );
     cubeMap.format = THREE.RGBFormat;
 
-    loader.load( '../images/skybox.png', function ( image ) {
+    loader.load( '../images/cube.jpg', function ( image ) {
 
         var getSide = function ( x, y ) {
             var size = 1024;
@@ -225,40 +223,41 @@ function animate() {
 
     intersects = raycaster.intersectObjects( scene.children );
 
-    // for( var i = 0 ; i < scene.children.length; i++ ){
-    //     if (typeof scene.children[i] != "undefined" && typeof scene.children[i].material != "undefined" ) {
-    //         scene.children[i].material.color.set( 0x04772d );
-    //     }
-    // }
-    // for( var i = 0 ; i < intersects.length; i++ ){
-    //     //console.log(intersects[i].object.material.color)
-    //     intersects[i].object.material.color.set( 0xff0000 );
-    // }
 
     renderer.render(scene, camera);
 
 
 }
 
+Number.prototype.roundTo = function(num) {
+    var nombre = this*(-1);
+
+    var resto = nombre%num;
+    if (resto <= (num/2)) {
+        return (nombre-resto)*(-1);
+    } else {
+        return (nombre+num-resto)*(-1);
+    }
+}
+
 document.addEventListener('keypress', (event) => {
-    const nomTouche = event.key;
-    //C pour créer un cube
-    if (nomTouche == "c") {
+    const keyName = event.key;
+    //create
+    if (keyName == "c") {
 
         if (intersects.length != 0) {
-            var appX = Math.round(intersects[0].point.x);
+
+            var appX = intersects[0].point.x.roundTo(2);
             var appY = Math.round(intersects[0].point.y);
-            var appZ = Math.round(intersects[0].point.z);
+            var appZ = intersects[0].point.z.roundTo(2);
 
             var geometry4 = new THREE.BoxGeometry(2, 2, 2);
             var texture = new THREE.TextureLoader().load( 'images/crate.gif' ); // Relatif au dossier build du projet
             var material4 = new THREE.MeshBasicMaterial( { map: texture } );
-            // var material4 = new THREE.MeshBasicMaterial({
-            //     color: 0x04772d
-            // });
+
             var mesh4 = new THREE.Mesh(geometry4, material4);
-            mesh4.position.x = appX
-            mesh4.position.z = appZ
+            mesh4.position.x = appX;
+            mesh4.position.z = appZ;
             mesh4.position.y = appY+1;
 
             scene.add(mesh4);
@@ -275,7 +274,8 @@ document.addEventListener('keypress', (event) => {
         }
 
     }
-    if(nomTouche == "v"){
+    // Highlight in red
+    if(keyName == "h"){
         if (intersects.length != 0) {
             if (intersects[0].object.geometry.type != "SphereGeometry") {
                 intersects[0].object.material.color.set( 0xff0000 );
@@ -283,7 +283,8 @@ document.addEventListener('keypress', (event) => {
         }
     }
 
-    if(nomTouche == "r"){
+    // Remove
+    if(keyName == "r"){
         if (intersects.length != 0) {
             if (intersects[0].point.y >= 0 && intersects[0].object.geometry.type != "SphereGeometry") {
                 scene.remove(intersects[0].object);
