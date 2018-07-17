@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import 'gsap'
 import 'three/examples/js/controls/PointerLockControls';
 
-var camera, scene, renderer, geometry, material, mesh;
+var camera, scene, renderer, geometry, material, mesh, loader;
 var controls, intersects;
 let myTween;
 let myTweenBack;
@@ -33,15 +33,38 @@ function init() {
     // camera
     camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
 
+    // GRASS MATERIAL
+    var grassMaterials = [
+        new THREE.MeshLambertMaterial({
+            map: THREE.ImageUtils.loadTexture('images/grass-dirt.png')
+        }),
+        new THREE.MeshLambertMaterial({
+            map: THREE.ImageUtils.loadTexture('images/grass-dirt.png')
+        }),
+        new THREE.MeshLambertMaterial({
+            map: THREE.ImageUtils.loadTexture('images/grass.png')
+        }),
+        new THREE.MeshLambertMaterial({
+            map: THREE.ImageUtils.loadTexture('images/dirt.png')
+        }),
+        new THREE.MeshLambertMaterial({
+            map: THREE.ImageUtils.loadTexture('images/grass-dirt.png')
+        }),
+        new THREE.MeshLambertMaterial({
+            map: THREE.ImageUtils.loadTexture('images/grass-dirt.png')
+        })
+    ];
+
     // cubes floor
     for (var x = 0; x < 30; x++) {
+        var material = new THREE.MeshFaceMaterial(grassMaterials);
+
         for (var y = 0; y < 30; y++) {
             var geometry = new THREE.BoxGeometry(2, 2, 2);
-            var texture = new THREE.TextureLoader().load( 'images/mine.jpg' ); // Relatif au dossier build du projet
-            var material = new THREE.MeshBasicMaterial( { map: texture } );
-            /*var material = new THREE.MeshBasicMaterial({
-                color: Math.floor(Math.random() * 16777215)
-            });*/
+
+/*            var texture = new THREE.TextureLoader().load( 'images/crate.gif' ); // Relatif au dossier build du projet
+            var material = new THREE.MeshBasicMaterial( { map: texture } );*/
+
             var mesh = new THREE.Mesh(geometry, material);
             mesh.position.x -= x * 2;
             mesh.position.z -= y * 2;
@@ -89,7 +112,7 @@ function init() {
     var sun = new THREE.Mesh( geometry, material );
     sun.position.x = -20;
     sun.position.y = 30;
-    sun.position.z = -20;
+    sun.position.z = -50;
     scene.add( sun );
 
     var light = new THREE.PointLight( 0xffffff, 1, 3000 );
@@ -107,6 +130,64 @@ function init() {
     pivotObject = new THREE.Object3D();
     sun.add(pivotObject);
     pivotObject.add( earth );
+
+
+    // SKY MATERIAL
+    loader = new THREE.ImageLoader();
+
+    var cubeMap = new THREE.CubeTexture( [] );
+    cubeMap.format = THREE.RGBFormat;
+
+    loader.load( '../images/skybox.png', function ( image ) {
+
+        var getSide = function ( x, y ) {
+            var size = 1024;
+            var canvas = document.createElement( 'canvas' );
+            canvas.width = size;
+            canvas.height = size;
+            var context = canvas.getContext( '2d' );
+            context.drawImage( image, - x * size, - y * size );
+            return canvas;
+        };
+
+        cubeMap.images[ 0 ] = getSide( 2, 1 ); // px
+        cubeMap.images[ 1 ] = getSide( 0, 1 ); // nx
+        cubeMap.images[ 2 ] = getSide( 1, 0 ); // py
+        cubeMap.images[ 3 ] = getSide( 1, 2 ); // ny
+        cubeMap.images[ 4 ] = getSide( 1, 1 ); // pz
+        cubeMap.images[ 5 ] = getSide( 3, 1 ); // nz
+        cubeMap.needsUpdate = true;
+
+    } );
+
+    var cubeShader = THREE.ShaderLib[ 'cube' ];
+    cubeShader.uniforms[ 'tCube' ].value = cubeMap;
+
+
+
+    var skyBoxMaterial = new THREE.ShaderMaterial( {
+        fragmentShader: cubeShader.fragmentShader,
+        vertexShader: cubeShader.vertexShader,
+        uniforms: cubeShader.uniforms,
+        depthWrite: false,
+        side: THREE.BackSide
+    } );
+
+    var skyBox = new THREE.Mesh(
+        new THREE.BoxGeometry( 100000, 100000, 100000 ),
+        skyBoxMaterial
+    );
+
+    scene.add( skyBox );
+
+    skyBox.position.y= -10;
+    skyBox.position.z= -10;
+
+    var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 1 );
+    hemiLight.position.set( 15, 500, 15 );
+    scene.add( hemiLight );
+
+
 }
 
 var clock = new THREE.Clock();
@@ -118,21 +199,21 @@ function animate() {
     requestAnimationFrame(animate);
 
     var delta = clock.getDelta();
-    var speed = 10;
+    var speed = 50;
     // up
-    if (keys[38]) {
+    if (keys[38] || keys[90]) {
         controls.getObject().translateZ(-delta * speed);
     }
     // down
-    if (keys[40]) {
+    if (keys[40] || keys[83]) {
         controls.getObject().translateZ(delta * speed);
     }
     // left
-    if (keys[37]) {
+    if (keys[37] || keys[81]) {
         controls.getObject().translateX(-delta * speed);
     }
     // right
-    if (keys[39]) {
+    if (keys[39] || keys[68]) {
         controls.getObject().translateX(delta * speed);
     }
 
@@ -170,7 +251,7 @@ document.addEventListener('keypress', (event) => {
             var appZ = Math.round(intersects[0].point.z);
 
             var geometry4 = new THREE.BoxGeometry(2, 2, 2);
-            var texture = new THREE.TextureLoader().load( 'images/mine.jpg' ); // Relatif au dossier build du projet
+            var texture = new THREE.TextureLoader().load( 'images/crate.gif' ); // Relatif au dossier build du projet
             var material4 = new THREE.MeshBasicMaterial( { map: texture } );
             // var material4 = new THREE.MeshBasicMaterial({
             //     color: 0x04772d
